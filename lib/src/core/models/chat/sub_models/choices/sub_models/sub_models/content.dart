@@ -12,7 +12,7 @@ class OpenAIChatCompletionChoiceMessageContentItemModel {
   /// The image url object.
   final Map<String, dynamic>? imageUrl;
 
-  final String? imageBase64;
+  final ImageItemModel? image;
 
   @override
   int get hashCode => type.hashCode ^ text.hashCode ^ imageUrl.hashCode;
@@ -22,7 +22,7 @@ class OpenAIChatCompletionChoiceMessageContentItemModel {
     required this.type,
     this.text,
     this.imageUrl,
-    this.imageBase64,
+    this.image,
   });
 
   /// This is used to convert a [Map<String, dynamic>] object to a [OpenAIChatCompletionChoiceMessageContentItemModel] object.
@@ -33,7 +33,7 @@ class OpenAIChatCompletionChoiceMessageContentItemModel {
       type: asMap['type'],
       text: asMap['text'],
       imageUrl: asMap['image_url'],
-      imageBase64: asMap['imageBase64'],
+      image: asMap['imageBase64'],
     );
   }
 
@@ -55,12 +55,12 @@ class OpenAIChatCompletionChoiceMessageContentItemModel {
     );
   }
 
-  factory OpenAIChatCompletionChoiceMessageContentItemModel.imageBase64(
-    String imageBase64,
+  factory OpenAIChatCompletionChoiceMessageContentItemModel.image(
+    ImageItemModel image,
   ) {
     return OpenAIChatCompletionChoiceMessageContentItemModel._(
-      type: 'image_base64',
-      imageBase64: imageBase64,
+      type: 'image_url',
+      image: image,
     );
   }
 
@@ -70,8 +70,7 @@ class OpenAIChatCompletionChoiceMessageContentItemModel {
       "type": type,
       if (text != null) "text": text,
       if (imageUrl != null) "image_url": imageUrl,
-      if (imageBase64 != null)
-        "image_url": {"url": "data:image/jpeg;base64,${imageBase64}"}
+      if (image != null) "image_url": image!.toMap(),
     };
   }
 
@@ -84,17 +83,48 @@ class OpenAIChatCompletionChoiceMessageContentItemModel {
     return other.type == type &&
         other.text == text &&
         other.imageUrl == imageUrl &&
-        other.imageBase64 == imageBase64;
+        other.image == image;
   }
 
   @override
   String toString() => switch (type) {
         'text' =>
           'OpenAIChatCompletionChoiceMessageContentItemModel(type: $type, text: $text)',
-        'image' =>
-          'OpenAIChatCompletionChoiceMessageContentItemModel(type: $type, imageUrl: $imageUrl)',
-        'image_base64' =>
-          'OpenAIChatCompletionChoiceMessageContentItemModel(type: $type, imageBase64: $imageBase64)',
+        'imageUrl' =>
+          'OpenAIChatCompletionChoiceMessageContentItemModel(type: $type, imageUrl: $imageUrl, image: $image)',
         _ => 'OpenAIChatCompletionChoiceMessageContentItemModel(type: $type)',
       };
+}
+
+class ImageItemModel {
+  ImageItemModel({required this.url, required this.detail});
+
+  /// The url of the base64Encoded image.
+  final String url;
+
+  /// The quality of the image to be percieved by the model.
+  final ImageDetail detail;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'url': url,
+      'detail': detail.name,
+    };
+  }
+}
+
+enum ImageDetail {
+  high,
+  low,
+}
+
+extension ImageDetailExtension on ImageDetail {
+  String get name {
+    switch (this) {
+      case ImageDetail.high:
+        return 'high';
+      case ImageDetail.low:
+        return 'low';
+    }
+  }
 }
